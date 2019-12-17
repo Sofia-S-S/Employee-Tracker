@@ -29,6 +29,7 @@ function start() {
         "ViewDpartments",
         "ViewRoles",
         "ViewEmployees",
+        "ViewEmployeesByDepartment",
         "UpdateDepartment",
         "UpdateRole",
         "UpdateEmployee",
@@ -59,6 +60,9 @@ function start() {
       } else if (answer.whatToDo === "ViewEmployees") {
         console.log("You choose to view all employees");
         viewEmployees();
+      } else if (answer.whatToDo === "ViewEmployeesByDepartment") {
+        console.log("You choose to view all employees");
+        viewEmployeesByDepartment();
       } else if (answer.whatToDo === "UpdateDepartment") {
         console.log("You choose to update a department");
         updateDepartment();
@@ -212,6 +216,8 @@ function viewEmployees() {
   });
 }
 
+function viewEmployeesByDepartment() {}
+
 function updateDepartment() {
   inquirer
     .prompt([
@@ -257,109 +263,121 @@ function viewEmployeesByManager() {
 }
 
 function deleteDepartment() {
-  inquirer
-    .prompt({
-      name: "delDep",
-      type: "input",
-      message: "Enter an ID of department you would like to delete"
-    })
-    .then(answer => {
-      connection.query(
-        "DELETE FROM department WHERE ?",
-        { id: answer.delDep },
-        err => {
-          if (err) throw err;
-          console.log("The department has been deleted");
-        }
-      );
-      connection.end();
-    });
-}
-
-function deleteRole() {
-  inquirer
-    .prompt({
-      name: "delRole",
-      type: "input",
-      message: "Enter an ID of role you would like to delete"
-    })
-    .then(answer => {
-      connection.query(
-        "DELETE FROM role WHERE ?",
-        { id: answer.delRole },
-        err => {
-          if (err) throw err;
-          console.log("The role has been deleted");
-        }
-      );
-      connection.end();
-    });
-}
-
-function deleteEmployee() {
-  inquirer
-    .prompt({
-      name: "delEmp",
-      type: "input",
-      message: "Enter an ID of employee you would like to delete"
-    })
-    .then(answer => {
-      connection.query(
-        "DELETE FROM employee WHERE ?",
-        { id: answer.delEmp },
-        err => {
-          if (err) throw err;
-          console.log("The employee has been deleted");
-        }
-      );
-      connection.end();
-    });
-}
-
-/*
-function updateEmployeeRole() {
-  connection.query("SELECT * FROM employee", (err, res) => {
-    inquirer.prompt(
-      {
+  connection.query("SELECT * FROM department", (err, res) => {
+    inquirer
+      .prompt({
         name: "choice",
-        type: "list",
-        message: "List of all employees:",
+        type: "rawlist",
+        message: "What department would you like to delete?",
         choices: function() {
           let choiceArray = [];
-          res.forEach(employee => {
-            choiceArray.push(employee.name);
+          res.forEach(department => {
+            choiceArray.push(department.name);
           });
           return choiceArray;
         }
-      },
-      err => {
-        if (err) throw err;
-        console.log("Role of employee has been updated");
-        console.log(res);
-      }
-    );
-  });
-}*/
-function updateEmployeeRole() {
-  inquirer
-    .prompt([
-      {
-        name: "EmpId",
-        type: "input",
-        message: "Enter an ID of an employee"
-      },
-      {
-        name: "newRole",
-        type: "input",
-        message: "Enter an ID of new role"
-      }
-    ])
-    .then(answer => {
-      var query = "UPDATE employee SET role_id=? WHERE id=?";
-      connection.query(query, [answer.newRole, answer.EmpId], err => {
-        if (err) throw err;
-        console.log("An Employee role has been updated");
+      })
+      .then(answer => {
+        connection.query(
+          "DELETE FROM department WHERE ?",
+          { name: answer.choice },
+          err => {
+            if (err) throw err;
+            console.log("The department has been deleted");
+          }
+        );
+        connection.end();
       });
-      connection.end();
-    });
+  });
+}
+
+function deleteRole() {
+  connection.query("SELECT * FROM role", (err, res) => {
+    inquirer
+      .prompt({
+        name: "choice",
+        type: "rawlist",
+        message: "What role would you like to delete?",
+        choices: function() {
+          let choiceArray = [];
+          res.forEach(role => {
+            choiceArray.push(role.title);
+          });
+          return choiceArray;
+        }
+      })
+      .then(answer => {
+        connection.query(
+          "DELETE FROM role WHERE ?",
+          { title: answer.choice },
+          err => {
+            if (err) throw err;
+            console.log("The role has been deleted");
+          }
+        );
+        connection.end();
+      });
+  });
+}
+
+function deleteEmployee() {
+  connection.query("SELECT * FROM employee", (err, res) => {
+    inquirer
+      .prompt({
+        name: "choice",
+        type: "rawlist",
+        message: "What employee would you like to delete?",
+        choices: function() {
+          let choiceArray = [];
+          res.forEach(employee => {
+            choiceArray.push(employee.last_name);
+          });
+          return choiceArray;
+        }
+      })
+      .then(answer => {
+        connection.query(
+          "DELETE FROM employee WHERE ?",
+          { last_name: answer.choice },
+          err => {
+            if (err) throw err;
+            console.log("The role has been deleted");
+          }
+        );
+        connection.end();
+      });
+  });
+}
+
+function updateEmployeeRole() {
+  connection.query("SELECT * FROM employee", (err, res) => {
+    inquirer
+      .prompt([
+        {
+          name: "choice",
+          type: "rawlist",
+          message: "which employee's role you would like to change?",
+          choices: function() {
+            let choiceArray = [];
+            res.forEach(employee => {
+              choiceArray.push(employee.last_name);
+            });
+            return choiceArray;
+          }
+        },
+        {
+          name: "newRole",
+          type: "input",
+          message: "Enter an ID of new role"
+        }
+      ])
+      .then(answer => {
+        var query = "UPDATE employee SET role_id=? WHERE last_name=?";
+        connection.query(query, [answer.newRole, answer.choice], err => {
+          if (err) throw err;
+          console.log("An Employee role has been updated");
+        });
+        connection.end();
+      });
+  });
 }
