@@ -37,7 +37,8 @@ function start() {
         "UpdateEmployeeRole",
         "DeleteDepartment",
         "DeleteRole",
-        "DeleteEmployee"
+        "DeleteEmployee",
+        "ViewBudgetByDepartment"
       ]
     })
     .then(answer => {
@@ -87,6 +88,9 @@ function start() {
       } else if (answer.whatToDo === "DeleteEmployee") {
         console.log("You choose to delete a Employee");
         deleteEmployee();
+      } else if (answer.whatToDo === "ViewBudgetByDepartment") {
+        console.log("You choose to delete a Employee");
+        viewBudgetByDepartment();
       }
     });
 }
@@ -380,4 +384,15 @@ function updateEmployeeRole() {
         connection.end();
       });
   });
+}
+
+function viewBudgetByDepartment() {
+  connection.query(
+    "SELECT department_id, SUM(salary) FROM employee INNER JOIN role ON employee.role_id = role.id GROUP BY department_id",
+    (err, res) => {
+      if (err) throw err;
+      console.log(res);
+      connection.end();
+    }
+  );
 }
